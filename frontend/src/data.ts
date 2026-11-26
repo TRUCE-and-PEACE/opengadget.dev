@@ -20,6 +20,9 @@ export const TOOLS_REPO = 'https://github.com/yv3000/og-tools'
 
 export const safeUrl = (url: string): string => (/^https?:\/\//i.test(url) ? url : REPO)
 
+const VERSION_RE = /^(stable|latest|beta|[vV]?[0-9]+(\.[0-9]+){0,3}(-[a-zA-Z0-9._-]+)?)$/
+export const isValidVersion = (ver: string): boolean => ver.length > 0 && ver.length <= 64 && VERSION_RE.test(ver)
+
 export const TOOLS: Tool[] = (generatedCatalog as Tool[]).map((t) => ({
   ...t,
   homepage: safeUrl(t.homepage),

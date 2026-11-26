@@ -9,7 +9,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
 const DEFAULT_TOOLS_REPO = 'https://github.com/yv3000/og-tools.git'
 const SLUG_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/
-const REPO_RE = /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/
+const REPO_RE = /^[a-zA-Z0-9][a-zA-Z0-9_.-]*\/[a-zA-Z0-9][a-zA-Z0-9_.-]*$/
+const NPM_PKG_RE = /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/
+const BREW_PKG_RE = /^[a-z0-9][a-z0-9@/._-]*$/i
 const RESERVED_DIRS = new Set(['node_modules', 'dist', 'frontend', 'functions', 'scripts'])
 
 function parseYamlValue(raw) {
@@ -138,7 +140,7 @@ function parseReleasesConf(content) {
     const val = line.slice(eq + 1).trim()
     conf[key] = val
   }
-  if (!conf.github_sources || !REPO_RE.test(conf.github_sources)) {
+  if (!conf.github_sources || !REPO_RE.test(conf.github_sources) || conf.github_sources.includes('..')) {
     throw new Error(`Invalid github_sources in releases.conf: ${conf.github_sources}`)
   }
   if (!conf.tag_prefix) conf.tag_prefix = 'v'
@@ -200,6 +202,15 @@ function collectTools(toolsRoot) {
         ? [meta.tags]
         : ['Utilities']
 
+    const npm = meta.npm ? String(meta.npm).trim() : ''
+    if (npm && !NPM_PKG_RE.test(npm)) {
+      throw new Error(`${slug}/README.md: invalid npm package name: ${npm}`)
+    }
+    const brew = meta.brew ? String(meta.brew).trim() : ''
+    if (brew && !BREW_PKG_RE.test(brew)) {
+      throw new Error(`${slug}/README.md: invalid brew formula name: ${brew}`)
+    }
+
     const catalogEntry = {
       name: slug,
       title: String(meta.title || slug),
@@ -207,8 +218,8 @@ function collectTools(toolsRoot) {
       version: String(meta.version || 'v1.0.0'),
       tags,
       homepage,
-      ...(meta.npm ? { npm: String(meta.npm) } : {}),
-      ...(meta.brew ? { brew: String(meta.brew) } : {}),
+      ...(npm ? { npm } : {}),
+      ...(brew ? { brew } : {}),
       cheat: parseCheatMarkdown(body),
     }
 

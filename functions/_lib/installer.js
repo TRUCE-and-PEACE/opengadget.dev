@@ -48,9 +48,10 @@ export function renderInstaller({ host, slug, version, tag, pkgUrl, toolEntry, k
 }
 
 export function renderErrorScript(kind, message) {
+  const safeMessage = String(message).replace(/[\0\r\n]+/g, ' ').slice(0, 200)
   if (kind === 'ps1') {
-    return `Write-Error ${quotePs1(message)}\nexit 1\n`
+    return `Write-Error ${quotePs1(safeMessage)}\nexit 1\n`
   }
-  return `printf '%s\\n' ${quoteSh(`error: ${message}`)} >&2\nexit 1\n`
+  return `printf '%s\\n' ${quoteSh(`error: ${safeMessage}`)} >&2\nexit 1\n`
 }
 

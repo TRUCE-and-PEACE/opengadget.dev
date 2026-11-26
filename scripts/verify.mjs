@@ -7,7 +7,7 @@ import { onRequest as handleRoute } from '../functions/[[path]].js'
 import { onRequestGet as handleInstaller } from '../functions/api/installers/[pkg].js'
 import { parseToolSpec, validateSlug, validateVersion } from '../functions/_lib/registry.js'
 import { resolveRelease, validateDownloadUrl } from '../functions/_lib/github.js'
-import { renderBootstrap, renderInstaller } from '../functions/_lib/installer.js'
+import { renderBootstrap, renderErrorScript, renderInstaller } from '../functions/_lib/installer.js'
 import { parseBootstrapCapabilities } from '../functions/_lib/ua.js'
 import { injectOgTags } from '../functions/_lib/og.js'
 
@@ -176,5 +176,39 @@ const xssHtml = injectOgTags(
 )
 assert.equal(xssHtml.includes('<script>alert(1)</script>'), false, 'OG tags must escape HTML')
 assert.match(xssHtml, /&quot;&gt;&lt;script&gt;alert\(1\)&lt;\/script&gt;/)
+
+// 6. Additional audit hardening checks
+const safeErrSh = renderErrorScript('sh', "bad\ninput\r\0';id;")
+assert.equal(safeErrSh.includes('\0'), false, 'error script must strip NUL bytes')
+assert.match(safeErrSh, /^printf '%s\\n'/)
+
+const safeErrPs1 = renderErrorScript('ps1', 'bad\ninput\r\0')
+assert.equal(safeErrPs1.includes('\0'), false, 'ps1 error script must strip NUL bytes')
+assert.match(safeErrPs1, /^Write-Error '/)
+
+await assert.rejects(
+  () =>
+    resolveRelease(
+      { github_sources: '../../evil/repo', tag_prefix: 'v' },
+      'stable',
+      { os: 'linux', arch: 'amd64', formats: ['tar'] },
+      'sh',
+      {},
+      async () => new Response('{}', { status: 200 }),
+    ),
+  /Invalid github_sources/,
+)
+
+{
+  const res = await handleRoute({
+    request: new Request('https://opengadget.dev/.well-known/security.txt', {
+      headers: { 'User-Agent': 'curl/8.5.0' },
+    }),
+    env: {},
+    next: async () => new Response('Contact: https://github.com/yv3000/opengadget.dev/security/advisories/new', { status: 200 }),
+  })
+  assert.equal(res.status, 200)
+  assert.match(await res.text(), /Contact:/)
+}
 
 console.log('ALL VERIFICATION CHECKS PASSED')
