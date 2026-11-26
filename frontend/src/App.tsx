@@ -43,7 +43,7 @@ export default function App() {
       : <NotFound path={path} />
 
   useEffect(() => {
-    document.title = tool ? `${tool.name} · opengadget.dev` : 'opengadget.dev · one-line installers'
+    document.title = tool ? `${tool.name} · OG` : 'OG'
   }, [tool])
 
   return (

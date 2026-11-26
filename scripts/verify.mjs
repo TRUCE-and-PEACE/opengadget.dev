@@ -26,7 +26,7 @@ assert.equal(
 // 2. Validate dist artifacts
 const distIndex = fs.readFileSync(path.join(ROOT, 'dist', 'index.html'), 'utf8')
 assert.ok(fs.existsSync(path.join(ROOT, 'dist', 'catalog.json')), 'dist/catalog.json must exist')
-assert.match(distIndex, /<title>opengadget\.dev/)
+assert.match(distIndex, /<title>OG<\/title>/)
 
 // 3. Validate dual-routing in functions/[[path]].js
 {
@@ -38,7 +38,7 @@ assert.match(distIndex, /<title>opengadget\.dev/)
     next: async () => new Response(distIndex, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } }),
   })
   assert.equal(res.status, 200)
-  assert.match(await res.text(), /<title>opengadget\.dev/)
+  assert.match(await res.text(), /<title>OG<\/title>/)
 }
 
 {

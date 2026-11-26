@@ -11,12 +11,13 @@ export function injectOgTags(html, tool, origin = 'https://opengadget.dev') {
   if (!tool || typeof tool.name !== 'string') return html
 
   const safeOrigin = String(origin).replace(/\/+$/, '')
+  const pageTitle = escapeHtml(`${tool.name} · OG`)
   const title = escapeHtml(`${tool.name} · opengadget.dev`)
   const description = escapeHtml(tool.tagline || `${tool.name} one-line installer`)
   const url = escapeHtml(`${safeOrigin}/${tool.name}`)
 
   let out = html
-  out = out.replace(/<title>[\s\S]*?<\/title>/i, () => `<title>${title}</title>`)
+  out = out.replace(/<title>[\s\S]*?<\/title>/i, () => `<title>${pageTitle}</title>`)
   out = out.replace(
     /<meta\s+name="description"\s+content="[^"]*"\s*\/?>/i,
     () => `<meta name="description" content="${description}" />`,
