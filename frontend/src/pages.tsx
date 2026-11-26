@@ -17,8 +17,8 @@ export function Home({ q, onResetSearch }: { q: string; onResetSearch: () => voi
     return TOOLS.filter((t) => (cat === 'All' || t.tags.includes(cat)) && (!s || t.name.includes(s) || t.tagline.toLowerCase().includes(s)))
   }, [q, cat])
 
-  const heroTool = TOOLS[0]?.name ?? '<tool>'
-  const heroHint = TOOLS[0] ? `replace ${heroTool} with any tool` : 'replace <tool> with any tool name'
+  const heroTool = '<tool>'
+  const heroHint = 'replace <tool> with any tool name'
 
   return (
     <>
@@ -107,20 +107,28 @@ const OS3 = [
 
 export function Detail({ tool, initialVersion }: { tool: Tool; initialVersion?: string }) {
   const [os, setOs] = useState<Os>(guessOs)
-  const [method, setMethod] = useState<'shell' | 'npm' | 'brew'>('shell')
+  const [method, setMethod] = useState<'shell' | 'wget' | 'npm' | 'brew'>('shell')
   const [version, setVersion] = useState(initialVersion || 'stable')
 
   const versionOptions = Array.from(new Set(['stable', tool.version, ...(initialVersion && initialVersion !== 'stable' ? [initialVersion] : []), 'beta']))
 
   const methods = [
     { id: 'shell' as const, label: os === 'windows' ? 'PowerShell' : 'curl' },
+    ...(os !== 'windows' ? [{ id: 'wget' as const, label: 'wget' }] : []),
     ...(tool.npm ? [{ id: 'npm' as const, label: 'npm' }] : []),
     ...(tool.brew && os !== 'windows' ? [{ id: 'brew' as const, label: 'brew' }] : []),
   ]
   const m = methods.some((x) => x.id === method) ? method : 'shell'
   const v = version === 'stable' ? '' : version
+  const spec = v ? `${tool.name}@${v}` : tool.name
   const cmd =
-    m === 'npm' ? `npm install -g ${tool.npm}${v ? '@' + v.replace(/^v/, '') : ''}` : m === 'brew' ? `brew install ${tool.brew}` : installCmd(tool.name, os, version)
+    m === 'npm'
+      ? `npm install -g ${tool.npm}${v ? '@' + v.replace(/^v/, '') : ''}`
+      : m === 'brew'
+        ? `brew install ${tool.brew}`
+        : m === 'wget'
+          ? `wget -qO- https://opengadget.dev/${spec} | sh`
+          : installCmd(tool.name, os, version)
   const win = os === 'windows'
   const verSuffix = version === 'stable' || version === 'beta' ? tool.version : version
   const paths = win
@@ -178,7 +186,11 @@ export function Detail({ tool, initialVersion }: { tool: Tool; initialVersion?: 
           <Tabs value={m} onChange={setMethod} options={methods} size="sm" />
         </div>
         <CommandLine cmd={cmd} />
-        {m === 'shell' && <p className="mt-3 px-1 text-xs text-muted">Installs {version === 'stable' ? 'the latest stable release' : `@${version}`} to your home folder. No sudo prompt.</p>}
+        {(m === 'shell' || m === 'wget') && (
+          <p className="mt-3 px-1 text-xs text-muted">
+            Installs {version === 'stable' ? 'the latest stable release' : `@${version}`} to your home folder. Works in sh, bash, and zsh — no sudo prompt.
+          </p>
+        )}
       </section>
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_320px]">
