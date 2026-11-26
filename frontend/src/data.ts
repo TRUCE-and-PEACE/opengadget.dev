@@ -15,8 +15,8 @@ export type Tool = {
 }
 
 export const SITE = 'https://opengadget.dev'
-export const REPO = 'https://github.com/yv3000/opengadget.dev'
-export const TOOLS_REPO = 'https://github.com/yv3000/og-tools'
+export const REPO = 'https://github.com/TRUCE-and-PEACE/opengadget.dev'
+export const TOOLS_REPO = 'https://github.com/TRUCE-and-PEACE/og-tools'
 
 export const safeUrl = (url: string): string => (/^https?:\/\//i.test(url) ? url : REPO)
 

@@ -93,7 +93,7 @@ export default function App() {
       <footer className="border-t border-line">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5 py-8 font-mono text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
           <a href={REPO} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:text-fg">
-            {Icon.github} github.com/yv3000/opengadget.dev
+            {Icon.github} github.com/TRUCE-and-PEACE/opengadget.dev
           </a>
           <div className="flex items-center gap-5">
             <a href="https://linktr.ee/yv_3000" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:text-fg">

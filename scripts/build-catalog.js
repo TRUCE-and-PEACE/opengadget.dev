@@ -7,7 +7,7 @@ import { injectOgTags } from '../functions/_lib/og.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
-const DEFAULT_TOOLS_REPO = 'https://github.com/yv3000/og-tools.git'
+const DEFAULT_TOOLS_REPO = 'https://github.com/TRUCE-and-PEACE/og-tools.git'
 const SLUG_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/
 const REPO_RE = /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/
 const RESERVED_DIRS = new Set(['node_modules', 'dist', 'frontend', 'functions', 'scripts'])
