@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.wrangler/
+frontend/src/catalog.generated.json
+functions/_lib/generated-registry.js
+frontend/public/catalog.json
+opengadget repo/
+.env
+.dev.vars

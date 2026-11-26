@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-raised: var(--raised);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+}
+
+:root {
+  --bg: #fafaf9;
+  --panel: #ffffff;
+  --raised: #f2f2f0;
+  --line: #e4e4e1;
+  --line-strong: #c9c9c4;
+  --fg: #0c0c0b;
+  --muted: #5b5b57;
+  --faint: #8b8b86;
+  --accent: #2f7d14;
+  --accent-fg: #ffffff;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #09090a;
+  --panel: #111113;
+  --raised: #18181b;
+  --line: #232327;
+  --line-strong: #36363c;
+  --fg: #f1f1ef;
+  --muted: #a1a1a6;
+  --faint: #6b6b72;
+  --accent: #b5f23d;
+  --accent-fg: #0b0f02;
+  color-scheme: dark;
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-fg font-sans antialiased;
+  }
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-fg);
+  }
+}
+
