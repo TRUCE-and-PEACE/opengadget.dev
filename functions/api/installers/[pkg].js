@@ -6,6 +6,8 @@ import { renderErrorScript, renderInstaller } from '../../_lib/installer.js'
 const TEXT_HEADERS = {
   'Content-Type': 'text/plain; charset=utf-8',
   'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Cache-Control': 'public, max-age=300',
 }
 
@@ -56,8 +58,13 @@ export async function onRequestGet(context, fetchImpl = fetch) {
 
     return new Response(script, { status: 200, headers: TEXT_HEADERS })
   } catch (err) {
-    const status = err?.status === 404 ? 404 : 502
-    return new Response(renderErrorScript(kind, err?.message || 'failed to resolve release'), {
+    const isNotFound = err?.status === 404
+    if (!isNotFound) {
+      console.error('Installer resolution failed:', err)
+    }
+    const status = isNotFound ? 404 : 502
+    const safeMsg = isNotFound ? err?.message || 'release not found' : 'failed to resolve release'
+    return new Response(renderErrorScript(kind, safeMsg), {
       status,
       headers: { ...TEXT_HEADERS, 'Cache-Control': 'no-store' },
     })

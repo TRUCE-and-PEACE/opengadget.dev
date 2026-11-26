@@ -3,12 +3,14 @@ import { classifyClient } from './_lib/ua.js'
 import { renderBootstrap, renderErrorScript } from './_lib/installer.js'
 import { injectOgTags } from './_lib/og.js'
 
-const PASSTHROUGH_PREFIXES = ['/assets/', '/api/']
+const PASSTHROUGH_PREFIXES = ['/assets/', '/api/', '/.well-known/']
 const PASSTHROUGH_EXACT = new Set(['/favicon.png', '/catalog.json', '/robots.txt', '/sitemap.xml'])
 
 const SCRIPT_HEADERS = {
   'Content-Type': 'text/plain; charset=utf-8',
   'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Cache-Control': 'public, max-age=60',
   Vary: 'User-Agent',
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { REPO, TOOLS_REPO, findTool } from './data'
+import { REPO, TOOLS_REPO, findTool, isValidVersion } from './data'
 import { Detail, Home, NotFound } from './pages'
 import { Icon, Link, go } from './ui'
 
@@ -34,8 +34,11 @@ export default function App() {
   }, [q])
 
   const slug = path.replace(/^\/+|\/+$/g, '')
-  const [toolSlug, rawVer] = slug.split('@')
-  const tool = findTool(toolSlug)
+  const parts = slug.split('@')
+  const toolSlug = parts.length <= 2 ? parts[0] : ''
+  const rawVer = parts.length === 2 ? parts[1] : undefined
+  const validVer = rawVer === undefined || isValidVersion(rawVer)
+  const tool = validVer ? findTool(toolSlug) : undefined
   const page = !slug
     ? <Home q={q} onResetSearch={() => setQ('')} />
     : tool

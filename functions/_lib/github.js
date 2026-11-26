@@ -6,8 +6,9 @@ const ALLOWED_DOWNLOAD_HOSTS = new Set([
   'codeload.github.com',
 ])
 
-const REPO_RE = /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/
+const REPO_RE = /^[a-zA-Z0-9][a-zA-Z0-9_.-]*\/[a-zA-Z0-9][a-zA-Z0-9_.-]*$/
 const TAG_RE = /^[a-zA-Z0-9._+-]{1,64}$/
+const FETCH_TIMEOUT_MS = 8000
 
 export function validateDownloadUrl(rawUrl) {
   let parsed
@@ -97,8 +98,30 @@ async function fetchJsonCached(url, env, fetchImpl) {
     cache = null
   }
 
-  const res = await fetchImpl(url, { headers })
+  const fetchOpts = { headers }
+  if (typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function') {
+    fetchOpts.signal = AbortSignal.timeout(FETCH_TIMEOUT_MS)
+  }
+
+  const res = await fetchImpl(url, fetchOpts)
   if (!res.ok) {
+    // Briefly cache 404s to prevent non-existent tag lookups from exhausting GitHub API rate limits
+    if (res.status === 404 && cache) {
+      try {
+        await cache.put(
+          cacheKey,
+          new Response(JSON.stringify(null), {
+            status: 404,
+            headers: {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'public, max-age=60',
+            },
+          }),
+        )
+      } catch {
+        // Ignore cache write errors in non-edge or read-only contexts
+      }
+    }
     return { status: res.status, data: null }
   }
   const data = await res.json()
@@ -123,7 +146,7 @@ async function fetchJsonCached(url, env, fetchImpl) {
 
 export async function resolveRelease(releasesConf, requestedVersion, capabilities, kind, env = {}, fetchImpl = fetch) {
   const ownerRepo = releasesConf?.github_sources
-  if (!ownerRepo || !REPO_RE.test(ownerRepo)) {
+  if (!ownerRepo || !REPO_RE.test(ownerRepo) || ownerRepo.includes('..')) {
     throw new Error('Invalid github_sources in releases.conf')
   }
   const tagPrefix = releasesConf?.tag_prefix ?? 'v'

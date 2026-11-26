@@ -1,0 +1,3 @@
+Contact: https://github.com/yv3000/opengadget.dev/security/advisories/new
+Preferred-Languages: en
+Canonical: https://opengadget.dev/.well-known/security.txt

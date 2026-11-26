@@ -166,7 +166,7 @@ export function Detail({ tool, initialVersion }: { tool: Tool; initialVersion?: 
               </option>
             ))}
           </select>
-          <a href={tool.homepage} className="inline-flex h-9 items-center gap-1.5 rounded-md border border-line-strong px-3 text-sm font-medium hover:border-fg">
+          <a href={tool.homepage} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 items-center gap-1.5 rounded-md border border-line-strong px-3 text-sm font-medium hover:border-fg">
             {tool.homepage.includes('github.com') ? Icon.github : null} Homepage {Icon.external}
           </a>
         </div>
