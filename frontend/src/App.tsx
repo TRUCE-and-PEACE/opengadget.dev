@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { REPO, findTool } from './data'
-import { Detail, Home, NotFound, States } from './pages'
+import { REPO, TOOLS_REPO, findTool } from './data'
+import { Detail, Home, NotFound } from './pages'
 import { Icon, Link, go } from './ui'
 
 export default function App() {
@@ -38,11 +38,9 @@ export default function App() {
   const tool = findTool(toolSlug)
   const page = !slug
     ? <Home q={q} onResetSearch={() => setQ('')} />
-    : slug === 'states'
-      ? <States />
-      : tool
-        ? <Detail key={`${tool.name}@${rawVer || 'stable'}`} tool={tool} initialVersion={rawVer} />
-        : <NotFound path={path} />
+    : tool
+      ? <Detail key={`${tool.name}@${rawVer || 'stable'}`} tool={tool} initialVersion={rawVer} />
+      : <NotFound path={path} />
 
   useEffect(() => {
     document.title = tool ? `${tool.name} · opengadget.dev` : 'opengadget.dev · one-line installers'
@@ -73,7 +71,7 @@ export default function App() {
             <kbd className="pointer-events-none absolute right-2 rounded border border-line px-1 font-mono text-xs text-faint">/</kbd>
           </label>
           <a
-            href={REPO}
+            href={TOOLS_REPO}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex h-9 items-center gap-1.5 rounded-md bg-fg px-3 text-sm font-medium text-bg"
@@ -97,12 +95,9 @@ export default function App() {
           <a href={REPO} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 hover:text-fg">
             {Icon.github} github.com/yv3000/opengadget.dev
           </a>
-          <div className="flex gap-5">
-            <Link to="/states" className="hover:text-fg">
-              components
-            </Link>
-            <a href="https://linktr.ee/yv_3000" target="_blank" rel="noopener noreferrer" className="hover:text-fg">
-              by @_yv_3000_
+          <div className="flex items-center gap-5">
+            <a href="https://linktr.ee/yv_3000" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:text-fg">
+              {Icon.linktree} by @_yv_3000_
             </a>
             <span>MIT License</span>
           </div>

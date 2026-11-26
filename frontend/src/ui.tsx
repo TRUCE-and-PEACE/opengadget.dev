@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { REPO, installCmd, type Os, type Tool } from './data'
+import { TOOLS_REPO, installCmd, type Os, type Tool } from './data'
 
 export const go = (path: string) => {
   history.pushState(null, '', path)
@@ -40,6 +40,11 @@ export const Icon = {
   github: (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M12 .5a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A11.5 11.5 0 0 0 12 .5z" />
+    </svg>
+  ),
+  linktree: (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M13.5 2h-3v4.8L7.1 3.4 5 5.5l3.5 3.4H3v3h5.5L5 15.3l2.1 2.1 3.4-3.4V22h3v-8l3.4 3.4 2.1-2.1-3.5-3.4H21v-3h-5.5L19 5.5l-2.1-2.1-3.4 3.4V2z" />
     </svg>
   ),
 }
@@ -186,7 +191,7 @@ export function Empty({ query, onReset }: { query: string; onReset?: () => void 
             Clear search
           </button>
         )}
-        <a href={REPO} className="inline-flex h-9 items-center gap-1.5 rounded-md bg-fg px-3 text-sm font-medium text-bg">
+        <a href={TOOLS_REPO} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 items-center gap-1.5 rounded-md bg-fg px-3 text-sm font-medium text-bg">
           {Icon.plus} Add a tool
         </a>
       </div>

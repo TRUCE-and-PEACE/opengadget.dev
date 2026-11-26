@@ -120,14 +120,14 @@ assert.match(distIndex, /<title>opengadget\.dev/)
   assert.equal(relSh.version, '2.3.9')
   assert.equal(relSh.pkgUrl, 'https://github.com/yv3000/bunpm/archive/refs/tags/v2.3.9.tar.gz')
 
-  const exampleSh = fs.readFileSync(path.join(ROOT, '_example', 'install.sh'), 'utf8')
+  const sampleSh = `pkg_install() {\n  webi_extract\n  rm -rf "$WEBI_OPT_DIR"\n}\npkg_post_install() {\n  webi_path_add\n}\n`
   const fullSh = renderInstaller({
     host: 'https://opengadget.dev',
     slug: 'mytool',
     version: relSh.version,
     tag: relSh.tag,
     pkgUrl: relSh.pkgUrl,
-    toolEntry: { installSh: exampleSh, installPs1: '' },
+    toolEntry: { installSh: sampleSh, installPs1: '' },
     kind: 'sh',
   })
   assert.match(fullSh, /WEBI_TAG='v2\.3\.9'/)

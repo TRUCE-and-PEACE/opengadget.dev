@@ -1,5 +1,5 @@
-import { useMemo, useState, type ReactNode } from 'react'
-import { CATEGORIES, REPO, TOOLS, installCmd, type Os, type Tool } from './data'
+import { useMemo, useState } from 'react'
+import { CATEGORIES, TOOLS, TOOLS_REPO, installCmd, type Os, type Tool } from './data'
 import { Chip, CommandLine, CopyButton, Empty, Icon, Link, Monogram, Tabs, Tag, ToolCard } from './ui'
 
 const OS2 = [
@@ -247,51 +247,9 @@ export function NotFound({ path }: { path: string }) {
         <Link to="/" className="inline-flex h-10 items-center rounded-md bg-fg px-4 text-sm font-medium text-bg">
           Browse all tools
         </Link>
-        <a href={REPO} className="inline-flex h-10 items-center gap-1.5 rounded-md border border-line-strong px-4 text-sm font-medium hover:border-fg">
+        <a href={TOOLS_REPO} target="_blank" rel="noopener noreferrer" className="inline-flex h-10 items-center gap-1.5 rounded-md border border-line-strong px-4 text-sm font-medium hover:border-fg">
           {Icon.github} Add it
         </a>
-      </div>
-    </div>
-  )
-}
-
-export function States() {
-  const t = TOOLS[0]
-  const [s1, setS1] = useState<Os>('macos')
-  const row = (label: string, children: ReactNode) => (
-    <div className="grid gap-3 border-t border-line py-8 md:grid-cols-[200px_1fr]">
-      <p className="font-mono text-sm text-muted">{label}</p>
-      <div className="flex flex-wrap items-start gap-6">{children}</div>
-    </div>
-  )
-  const cap = (s: string, c: ReactNode) => (
-    <div className="min-w-0 flex-1 basis-72">
-      <p className="mb-2 font-mono text-xs text-faint">{s}</p>
-      {c}
-    </div>
-  )
-  return (
-    <div className="mx-auto max-w-6xl px-5 py-14">
-      <h1 className="text-3xl font-semibold tracking-tight">States &amp; components</h1>
-      <p className="mt-2 text-muted">Every interactive piece of opengadget.dev, in each state. Toggle the theme to see both modes.</p>
-      <div className="mt-10">
-        {t && row('Tool card', <>{cap('default', <ToolCard tool={t} os="macos" />)}{cap('hover', <ToolCard tool={t} os="macos" hover />)}</>)}
-        {row('Copy button', <>{cap('default', <CopyButton text="x" forced={false} />)}{cap('copied', <CopyButton text="x" forced />)}</>)}
-        {row(
-          'OS tabs',
-          <>
-            {cap('macOS active', <Tabs value="macos" onChange={() => {}} options={OS3} />)}
-            {cap('interactive', <Tabs value={s1} onChange={setS1} options={OS3} />)}
-          </>,
-        )}
-        {row('Tag chips', <>{cap('default', <Chip>DevTools</Chip>)}{cap('selected', <Chip selected>DevTools</Chip>)}</>)}
-        {row('Empty search', <div className="w-full">{<Empty query="kubectl-ultra" />}</div>)}
-        {row(
-          '404 page',
-          <div className="w-full overflow-hidden rounded-xl border border-line">
-            <NotFound path="/kubectl-ultra" />
-          </div>,
-        )}
       </div>
     </div>
   )

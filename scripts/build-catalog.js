@@ -1,10 +1,13 @@
+import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { injectOgTags } from '../functions/_lib/og.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
+const DEFAULT_TOOLS_REPO = 'https://github.com/yv3000/og-tools.git'
 const SLUG_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/
 const REPO_RE = /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/
 const RESERVED_DIRS = new Set(['node_modules', 'dist', 'frontend', 'functions', 'scripts'])
@@ -142,8 +145,35 @@ function parseReleasesConf(content) {
   return conf
 }
 
-function collectTools() {
-  const entries = fs.readdirSync(ROOT, { withFileTypes: true })
+function resolveToolsSource() {
+  const localDir = process.env.OG_TOOLS_DIR?.trim()
+  if (localDir) {
+    return { dir: path.resolve(localDir), cleanup: () => {} }
+  }
+
+  const repoUrl = process.env.OG_TOOLS_REPO?.trim() || DEFAULT_TOOLS_REPO
+  if (!/^https:\/\//i.test(repoUrl)) {
+    throw new Error(`OG_TOOLS_REPO must be an https:// URL (got: ${repoUrl})`)
+  }
+
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'og-tools-'))
+  try {
+    execFileSync('git', ['clone', '--depth', '1', '--branch', 'main', repoUrl, tmpDir], {
+      stdio: 'pipe',
+    })
+  } catch (err) {
+    fs.rmSync(tmpDir, { recursive: true, force: true })
+    throw err
+  }
+
+  return {
+    dir: tmpDir,
+    cleanup: () => fs.rmSync(tmpDir, { recursive: true, force: true }),
+  }
+}
+
+function collectTools(toolsRoot) {
+  const entries = fs.readdirSync(toolsRoot, { withFileTypes: true })
   const tools = []
 
   for (const entry of entries) {
@@ -151,7 +181,7 @@ function collectTools() {
     const slug = entry.name
     if (!SLUG_RE.test(slug) || RESERVED_DIRS.has(slug)) continue
 
-    const dir = path.join(ROOT, slug)
+    const dir = path.join(toolsRoot, slug)
     const readmePath = path.join(dir, 'README.md')
     const confPath = path.join(dir, 'releases.conf')
     if (!fs.existsSync(readmePath) || !fs.existsSync(confPath)) continue
@@ -199,7 +229,14 @@ function collectTools() {
 }
 
 function buildCatalog() {
-  const tools = collectTools()
+  const source = resolveToolsSource()
+  let tools
+  try {
+    tools = collectTools(source.dir)
+  } finally {
+    source.cleanup()
+  }
+
   const catalog = tools.map((t) => t.catalogEntry)
 
   const publicDir = path.join(ROOT, 'frontend', 'public')
@@ -270,4 +307,3 @@ const catalog = ogOnly
 if (ogOnly) {
   buildOgPages(catalog)
 }
-

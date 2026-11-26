@@ -16,6 +16,7 @@ export type Tool = {
 
 export const SITE = 'https://opengadget.dev'
 export const REPO = 'https://github.com/yv3000/opengadget.dev'
+export const TOOLS_REPO = 'https://github.com/yv3000/og-tools'
 
 export const safeUrl = (url: string): string => (/^https?:\/\//i.test(url) ? url : REPO)
 
@@ -35,4 +36,3 @@ export const installCmd = (tool: string, os: Os, version = '') => {
   const t = version && version !== 'stable' ? `${tool}@${version}` : tool
   return os === 'windows' ? `irm ${SITE}/${t} | iex` : `curl -sS ${SITE}/${t} | sh`
 }
-
