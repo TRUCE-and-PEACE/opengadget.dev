@@ -16,10 +16,14 @@ export type Tool = {
   cargo?: string
   go?: string
   brew?: string
+  listedAt?: string
+  updatedAt?: string
+  updates?: number
   cheat?: Block[]
 }
 
 export const SITE = 'https://opengadget.dev'
+export const HOST = 'opengadget.dev'
 export const REPO = 'https://github.com/TRUCE-and-PEACE/opengadget.dev'
 export const TOOLS_REPO = 'https://github.com/TRUCE-and-PEACE/og-tools'
 
@@ -34,7 +38,7 @@ export const findTool = (name: string) => TOOLS.find((t) => t.name === name)
 
 export const installCmd = (tool: string, os: Os, version = '') => {
   const t = version && version !== 'stable' ? `${tool}@${version}` : tool
-  return os === 'windows' ? `irm ${SITE}/${t} | iex` : `curl -sS ${SITE}/${t} | sh`
+  return os === 'windows' ? `irm ${HOST}/${t} | iex` : `curl -sSL ${HOST}/${t} | sh`
 }
 
 export function getCrossOsMethods(tool: Tool): { id: CrossOsMethod; label: string; cmd: (ver?: string) => string }[] {

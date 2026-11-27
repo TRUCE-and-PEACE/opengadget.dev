@@ -158,7 +158,7 @@ function resolveToolsSource() {
 
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'og-tools-'))
   try {
-    execFileSync('git', ['clone', '--depth', '1', '--branch', 'main', repoUrl, tmpDir], {
+    execFileSync('git', ['clone', '--branch', 'main', repoUrl, tmpDir], {
       stdio: 'pipe',
     })
   } catch (err) {
@@ -169,6 +169,26 @@ function resolveToolsSource() {
   return {
     dir: tmpDir,
     cleanup: () => fs.rmSync(tmpDir, { recursive: true, force: true }),
+  }
+}
+
+function getToolHistory(toolsRoot, slug) {
+  try {
+    const out = execFileSync('git', ['-C', toolsRoot, 'log', '--format=%cI', '--', slug], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim()
+    if (!out) return {}
+    const dates = out.split(/\r?\n/).filter(Boolean)
+    const listedAt = dates[dates.length - 1].slice(0, 10)
+    const updatedAt = dates[0].slice(0, 10)
+    return {
+      listedAt,
+      updatedAt,
+      updates: Math.max(0, dates.length - 1),
+    }
+  } catch {
+    return {}
   }
 }
 
@@ -213,6 +233,7 @@ function collectTools(toolsRoot) {
       ...(meta.cargo ? { cargo: String(meta.cargo) } : {}),
       ...(meta.go ? { go: String(meta.go) } : {}),
       ...(meta.brew ? { brew: String(meta.brew) } : {}),
+      ...getToolHistory(toolsRoot, slug),
       cheat: parseCheatMarkdown(body),
     }
 

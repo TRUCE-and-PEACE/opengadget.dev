@@ -150,20 +150,17 @@ export function ToolCard({ tool, os, hover }: { tool: Tool; os: Os; hover?: bool
   const cmd = primaryInstallCmd(tool, os)
   return (
     <div className={`relative flex flex-col gap-4 rounded-xl border bg-panel p-4 transition-colors has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-accent ${hover ? 'border-fg' : 'border-line hover:border-fg'}`}>
-      <div className="flex items-start gap-3">
-        <Monogram name={tool.name} />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="truncate font-mono font-semibold">
-              {/* stretched link: whole card navigates, copy button stays a separate control */}
-              <Link to={`/${tool.name}`} className="outline-none after:absolute after:inset-0 after:rounded-xl">
-                {tool.name}
-              </Link>
-            </h3>
-            <span className="shrink-0 font-mono text-xs text-faint">{tool.version}</span>
-          </div>
-          {tool.tagline && <p className="mt-1 line-clamp-2 text-sm text-muted">{tool.tagline}</p>}
+      <div className="min-w-0">
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="truncate font-mono font-semibold">
+            {/* stretched link: whole card navigates, copy button stays a separate control */}
+            <Link to={`/${tool.name}`} className="outline-none after:absolute after:inset-0 after:rounded-xl">
+              {tool.name}
+            </Link>
+          </h3>
+          <span className="shrink-0 font-mono text-xs text-faint">{tool.version}</span>
         </div>
+        {tool.tagline && <p className="mt-1 line-clamp-2 text-sm text-muted">{tool.tagline}</p>}
       </div>
       {tool.tags.length > 0 && (
         <div className="flex flex-wrap gap-1.5">

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { TOOLS, TOOLS_REPO, getCrossOsMethods, installCmd, type CrossOsMethod, type Os, type Tool } from './data'
-import { CommandLine, CopyButton, Empty, Icon, Link, Monogram, Tabs, Tag, ToolCard } from './ui'
+import { CommandLine, CopyButton, Empty, Icon, Link, Tabs, Tag, ToolCard } from './ui'
 
 const OS2 = [
   { id: 'macos' as Os, label: 'macOS / Linux' },
@@ -116,11 +116,11 @@ export function Detail({ tool, initialVersion }: { tool: Tool; initialVersion?: 
     : m === 'brew'
       ? `brew install ${tool.brew}`
       : m === 'wget'
-        ? `wget -qO- https://opengadget.dev/${spec} | sh`
+        ? `wget -qO- opengadget.dev/${spec} | sh`
         : m === 'bash'
-          ? `curl -sS https://opengadget.dev/${spec} | bash`
+          ? `curl -sSL opengadget.dev/${spec} | bash`
           : m === 'zsh'
-            ? `curl -sS https://opengadget.dev/${spec} | zsh`
+            ? `curl -sSL opengadget.dev/${spec} | zsh`
             : installCmd(tool.name, os, version)
   const win = os === 'windows'
   const verSuffix = version === 'stable' || version === 'beta' ? tool.version : version
@@ -135,19 +135,16 @@ export function Detail({ tool, initialVersion }: { tool: Tool; initialVersion?: 
         ← all tools
       </Link>
       <header className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex items-start gap-4">
-          <Monogram name={tool.name} size="lg" />
-          <div>
-            <h1 className="font-mono text-3xl font-semibold tracking-tight sm:text-4xl">{tool.name}</h1>
-            {tool.tagline && <p className="mt-1.5 text-muted">{tool.tagline}</p>}
-            {tool.tags.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {tool.tags.map((t) => (
-                  <Tag key={t}>{t}</Tag>
-                ))}
-              </div>
-            )}
-          </div>
+        <div>
+          <h1 className="font-mono text-3xl font-semibold tracking-tight sm:text-4xl">{tool.name}</h1>
+          {tool.tagline && <p className="mt-1.5 text-muted">{tool.tagline}</p>}
+          {tool.tags.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {tool.tags.map((t) => (
+                <Tag key={t}>{t}</Tag>
+              ))}
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <label className="sr-only" htmlFor="ver">
@@ -217,6 +214,25 @@ export function Detail({ tool, initialVersion }: { tool: Tool; initialVersion?: 
               Delete the paths above. <code className="font-mono text-fg">{win ? `rm -r ~\\.local\\opt\\${tool.name}-${verSuffix}` : `rm -rf ~/.local/opt/${tool.name}-${verSuffix}`}</code>
             </p>
           </div>
+          {tool.listedAt && (
+            <div className="mt-5 border-t border-line pt-4">
+              <p className="text-xs text-faint">History</p>
+              <dl className="mt-2 space-y-1.5 font-mono text-xs">
+                <div className="flex justify-between gap-2">
+                  <dt className="text-muted">Listed</dt>
+                  <dd className="text-fg">{tool.listedAt}</dd>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <dt className="text-muted">Updates</dt>
+                  <dd className="text-fg">{tool.updates ?? 0}</dd>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <dt className="text-muted">Latest update</dt>
+                  <dd className="text-fg">{tool.updatedAt}</dd>
+                </div>
+              </dl>
+            </div>
+          )}
         </aside>
       </div>
     </div>
