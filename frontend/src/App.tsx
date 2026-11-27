@@ -97,7 +97,7 @@ export default function App() {
           </a>
           <div className="flex items-center gap-5">
             <a href="https://linktr.ee/yv_3000" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:text-fg">
-              {Icon.linktree} by @_yv_3000_
+              {Icon.linktree} by @yv_3000
             </a>
             <span>MIT License</span>
           </div>
