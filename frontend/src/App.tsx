@@ -51,13 +51,11 @@ export default function App() {
       <header className="sticky top-0 z-10 border-b border-line bg-bg/85 backdrop-blur">
         <nav className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-5">
           <Link to="/" className="mr-auto flex items-center gap-2 font-mono text-[15px] font-semibold">
-            <span className="grid size-7 place-items-center rounded-md bg-fg text-bg">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="8" cy="12" r="4" />
-                <path d="M19 9.5a4 4 0 1 0 0 5h-3v-2h3" />
-                <path d="M3 18.5C7 16 17 8 21 5.5" />
-              </svg>
-            </span>
+            <img
+              src={dark ? '/logo-dark.jpg' : '/logo-light.jpg'}
+              alt="OG"
+              className="size-7 rounded-md object-cover"
+            />
             opengadget<span className="text-faint">.dev</span>
           </Link>
           <label className="relative flex items-center">
