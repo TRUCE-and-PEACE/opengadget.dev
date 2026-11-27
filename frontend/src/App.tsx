@@ -48,7 +48,7 @@ export default function App() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-10 border-b border-line bg-bg/85 backdrop-blur">
+      <header className="sticky top-0 z-10 border-b border-line bg-white/95 backdrop-blur dark:bg-black/95">
         <nav className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-5">
           <Link to="/" className="mr-auto flex items-center gap-2 font-mono text-[15px] font-semibold">
             <img
