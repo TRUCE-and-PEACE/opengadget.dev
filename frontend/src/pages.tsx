@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { CATEGORIES, TOOLS, TOOLS_REPO, installCmd, type Os, type Tool } from './data'
-import { Chip, CommandLine, CopyButton, Empty, Icon, Link, Monogram, Tabs, Tag, ToolCard } from './ui'
+import { TOOLS, TOOLS_REPO, getCrossOsMethods, installCmd, type CrossOsMethod, type Os, type Tool } from './data'
+import { CommandLine, CopyButton, Empty, Icon, Link, Monogram, Tabs, Tag, ToolCard } from './ui'
 
 const OS2 = [
   { id: 'macos' as Os, label: 'macOS / Linux' },
@@ -10,12 +10,11 @@ const guessOs = (): Os => (navigator.userAgent.includes('Win') ? 'windows' : 'ma
 
 export function Home({ q, onResetSearch }: { q: string; onResetSearch: () => void }) {
   const [os, setOs] = useState<Os>(guessOs)
-  const [cat, setCat] = useState('All')
 
   const list = useMemo(() => {
     const s = q.trim().toLowerCase()
-    return TOOLS.filter((t) => (cat === 'All' || t.tags.includes(cat)) && (!s || t.name.includes(s) || t.tagline.toLowerCase().includes(s)))
-  }, [q, cat])
+    return TOOLS.filter((t) => !s || t.name.includes(s) || t.tagline.toLowerCase().includes(s))
+  }, [q])
 
   const heroTool = '<tool>'
   const heroHint = 'replace <tool> with any tool name'
@@ -42,18 +41,9 @@ export function Home({ q, onResetSearch }: { q: string; onResetSearch: () => voi
       </section>
 
       <section id="tools" className="mx-auto max-w-6xl px-5 py-14">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex gap-2 overflow-x-auto pb-1 lg:pb-0">
-            {CATEGORIES.map((c) => (
-              <Chip key={c} selected={cat === c} onClick={() => setCat(c)}>
-                {c}
-              </Chip>
-            ))}
-          </div>
-          <p className="font-mono text-xs text-faint">
-            {list.length} of {TOOLS.length} tools
-          </p>
-        </div>
+        <p className="font-mono text-xs text-faint">
+          {list.length} of {TOOLS.length} tools
+        </p>
         <div className="mt-4">
           {list.length ? (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -62,17 +52,7 @@ export function Home({ q, onResetSearch }: { q: string; onResetSearch: () => voi
               ))}
             </div>
           ) : (
-            <Empty
-              query={q}
-              onReset={
-                q || cat !== 'All'
-                  ? () => {
-                      onResetSearch()
-                      setCat('All')
-                    }
-                  : undefined
-              }
-            />
+            <Empty query={q} onReset={q ? onResetSearch : undefined} />
           )}
         </div>
       </section>
@@ -105,15 +85,19 @@ const OS3 = [
   { id: 'windows' as Os, label: 'Windows' },
 ]
 
+type MethodId = CrossOsMethod | 'shell' | 'bash' | 'zsh' | 'wget' | 'brew'
+
 export function Detail({ tool, initialVersion }: { tool: Tool; initialVersion?: string }) {
   const [os, setOs] = useState<Os>(guessOs)
-  const [method, setMethod] = useState<'shell' | 'bash' | 'zsh' | 'wget' | 'npm' | 'brew'>('shell')
+  const crossMethods = getCrossOsMethods(tool)
+  const [method, setMethod] = useState<MethodId>(() => crossMethods[0]?.id ?? 'shell')
   const [version, setVersion] = useState(initialVersion || 'stable')
 
   const versionOptions = Array.from(new Set(['stable', tool.version, ...(initialVersion && initialVersion !== 'stable' ? [initialVersion] : []), 'beta']))
 
-  const methods = [
-    { id: 'shell' as const, label: os === 'windows' ? 'PowerShell' : 'curl' },
+  const methods: { id: MethodId; label: string }[] = [
+    ...crossMethods.map((c) => ({ id: c.id as MethodId, label: c.label })),
+    { id: 'shell', label: os === 'windows' ? 'PowerShell' : 'curl' },
     ...(os !== 'windows'
       ? [
           { id: 'bash' as const, label: 'bash' },
@@ -121,34 +105,29 @@ export function Detail({ tool, initialVersion }: { tool: Tool; initialVersion?: 
           { id: 'wget' as const, label: 'wget' },
         ]
       : []),
-    ...(tool.npm ? [{ id: 'npm' as const, label: 'npm' }] : []),
     ...(tool.brew && os !== 'windows' ? [{ id: 'brew' as const, label: 'brew' }] : []),
   ]
-  const m = methods.some((x) => x.id === method) ? method : 'shell'
+  const m = methods.some((x) => x.id === method) ? method : methods[0].id
   const v = version === 'stable' ? '' : version
   const spec = v ? `${tool.name}@${v}` : tool.name
-  const cmd =
-    m === 'npm'
-      ? `npm install -g ${tool.npm}${v ? '@' + v.replace(/^v/, '') : ''}`
-      : m === 'brew'
-        ? `brew install ${tool.brew}`
-        : m === 'wget'
-          ? `wget -qO- https://opengadget.dev/${spec} | sh`
-          : m === 'bash'
-            ? `curl -sS https://opengadget.dev/${spec} | bash`
-            : m === 'zsh'
-              ? `curl -sS https://opengadget.dev/${spec} | zsh`
-              : installCmd(tool.name, os, version)
+  const crossHit = crossMethods.find((c) => c.id === m)
+  const cmd = crossHit
+    ? crossHit.cmd(v)
+    : m === 'brew'
+      ? `brew install ${tool.brew}`
+      : m === 'wget'
+        ? `wget -qO- https://opengadget.dev/${spec} | sh`
+        : m === 'bash'
+          ? `curl -sS https://opengadget.dev/${spec} | bash`
+          : m === 'zsh'
+            ? `curl -sS https://opengadget.dev/${spec} | zsh`
+            : installCmd(tool.name, os, version)
   const win = os === 'windows'
   const verSuffix = version === 'stable' || version === 'beta' ? tool.version : version
   const paths = win
     ? [`%USERPROFILE%\\.local\\bin\\${tool.name}.cmd`, `%USERPROFILE%\\.local\\opt\\${tool.name}-${verSuffix}\\`, '%USERPROFILE%\\.config\\envman\\PATH.env']
     : [`~/.local/bin/${tool.name}`, `~/.local/opt/${tool.name}-${verSuffix}/`, '~/.config/envman/PATH.env']
-  const cheat = tool.cheat ?? [
-    { p: `${tool.name} is installed as a single binary. Check it works:` },
-    { h: 'Verify', code: `${tool.name} --version` },
-    { h: 'Update to latest', code: installCmd(tool.name, os) },
-  ]
+  const cheat = tool.cheat ?? []
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-10 sm:py-14">
@@ -160,12 +139,14 @@ export function Detail({ tool, initialVersion }: { tool: Tool; initialVersion?: 
           <Monogram name={tool.name} size="lg" />
           <div>
             <h1 className="font-mono text-3xl font-semibold tracking-tight sm:text-4xl">{tool.name}</h1>
-            <p className="mt-1.5 text-muted">{tool.tagline}</p>
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {tool.tags.map((t) => (
-                <Tag key={t}>{t}</Tag>
-              ))}
-            </div>
+            {tool.tagline && <p className="mt-1.5 text-muted">{tool.tagline}</p>}
+            {tool.tags.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {tool.tags.map((t) => (
+                  <Tag key={t}>{t}</Tag>
+                ))}
+              </div>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -205,16 +186,20 @@ export function Detail({ tool, initialVersion }: { tool: Tool; initialVersion?: 
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_320px]">
         <article>
-          <h2 className="text-xl font-semibold tracking-tight">Cheat sheet &amp; usage</h2>
-          <div className="mt-5 space-y-6">
-            {cheat.map((b, i) => (
-              <div key={i}>
-                {b.h && <h3 className="mb-2 font-semibold">{b.h}</h3>}
-                {b.p && <p className="mb-3 text-muted">{b.p}</p>}
-                {b.code && <CodeBlock code={b.code} />}
+          {cheat.length > 0 && (
+            <>
+              <h2 className="text-xl font-semibold tracking-tight">Cheat sheet &amp; usage</h2>
+              <div className="mt-5 space-y-6">
+                {cheat.map((b, i) => (
+                  <div key={i}>
+                    {b.h && <h3 className="mb-2 font-semibold">{b.h}</h3>}
+                    {b.p && <p className="mb-3 text-muted">{b.p}</p>}
+                    {b.code && <CodeBlock code={b.code} />}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
         </article>
         <aside className="h-fit rounded-xl border border-line bg-panel p-5 lg:sticky lg:top-20">
           <h2 className="font-semibold">What gets installed</h2>

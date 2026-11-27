@@ -51,7 +51,7 @@ export default function App() {
       <header className="sticky top-0 z-10 border-b border-line bg-bg/85 backdrop-blur">
         <nav className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-5">
           <Link to="/" className="mr-auto flex items-center gap-2 font-mono text-[15px] font-semibold">
-            <span className="grid size-6 place-items-center rounded bg-fg text-xs text-bg">&gt;_</span>
+            <img src="/favicon.png?v=2" alt="OG" className="size-6 rounded bg-white object-contain p-0.5" />
             opengadget<span className="text-faint">.dev</span>
           </Link>
           <label className="relative flex items-center">

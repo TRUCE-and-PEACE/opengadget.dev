@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { TOOLS_REPO, installCmd, type Os, type Tool } from './data'
+import { TOOLS_REPO, primaryInstallCmd, type Os, type Tool } from './data'
 
 export const go = (path: string) => {
   history.pushState(null, '', path)
@@ -137,7 +137,7 @@ export const Monogram = ({ name, size = 'md' }: { name: string; size?: 'md' | 'l
 export function CommandLine({ cmd, compact }: { cmd: string; compact?: boolean }) {
   return (
     <div className={`flex items-center gap-3 rounded-lg border border-line bg-bg ${compact ? 'py-1 pr-1 pl-3' : 'py-2 pr-2 pl-4'}`}>
-      <code className={`min-w-0 flex-1 overflow-x-auto font-mono whitespace-nowrap text-fg ${compact ? 'text-xs' : 'text-sm sm:text-base'}`}>
+      <code className={`no-scrollbar min-w-0 flex-1 overflow-x-auto font-mono whitespace-nowrap text-fg ${compact ? 'truncate text-xs' : 'text-sm sm:text-base'}`}>
         <span className="text-accent select-none">$ </span>
         {cmd}
       </code>
@@ -147,7 +147,7 @@ export function CommandLine({ cmd, compact }: { cmd: string; compact?: boolean }
 }
 
 export function ToolCard({ tool, os, hover }: { tool: Tool; os: Os; hover?: boolean }) {
-  const cmd = installCmd(tool.name, os)
+  const cmd = primaryInstallCmd(tool, os)
   return (
     <div className={`relative flex flex-col gap-4 rounded-xl border bg-panel p-4 transition-colors has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-accent ${hover ? 'border-fg' : 'border-line hover:border-fg'}`}>
       <div className="flex items-start gap-3">
@@ -162,14 +162,16 @@ export function ToolCard({ tool, os, hover }: { tool: Tool; os: Os; hover?: bool
             </h3>
             <span className="shrink-0 font-mono text-xs text-faint">{tool.version}</span>
           </div>
-          <p className="mt-1 line-clamp-2 text-sm text-muted">{tool.tagline}</p>
+          {tool.tagline && <p className="mt-1 line-clamp-2 text-sm text-muted">{tool.tagline}</p>}
         </div>
       </div>
-      <div className="flex flex-wrap gap-1.5">
-        {tool.tags.map((t) => (
-          <Tag key={t}>{t}</Tag>
-        ))}
-      </div>
+      {tool.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {tool.tags.map((t) => (
+            <Tag key={t}>{t}</Tag>
+          ))}
+        </div>
+      )}
       <div className="relative z-[1] mt-auto">
         <CommandLine cmd={cmd} compact />
       </div>

@@ -198,7 +198,7 @@ function collectTools(toolsRoot) {
       ? meta.tags
       : typeof meta.tags === 'string'
         ? [meta.tags]
-        : ['Utilities']
+        : []
 
     const catalogEntry = {
       name: slug,
@@ -208,6 +208,10 @@ function collectTools(toolsRoot) {
       tags,
       homepage,
       ...(meta.npm ? { npm: String(meta.npm) } : {}),
+      ...(meta.pip ? { pip: String(meta.pip) } : {}),
+      ...(meta.uv ? { uv: String(meta.uv) } : {}),
+      ...(meta.cargo ? { cargo: String(meta.cargo) } : {}),
+      ...(meta.go ? { go: String(meta.go) } : {}),
       ...(meta.brew ? { brew: String(meta.brew) } : {}),
       cheat: parseCheatMarkdown(body),
     }
