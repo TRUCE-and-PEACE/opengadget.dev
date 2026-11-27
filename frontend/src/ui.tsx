@@ -137,7 +137,7 @@ export const Monogram = ({ name, size = 'md' }: { name: string; size?: 'md' | 'l
 export function CommandLine({ cmd, compact }: { cmd: string; compact?: boolean }) {
   return (
     <div className={`flex items-center gap-3 rounded-lg border border-line bg-bg ${compact ? 'py-1 pr-1 pl-3' : 'py-2 pr-2 pl-4'}`}>
-      <code className={`no-scrollbar min-w-0 flex-1 overflow-x-auto font-mono whitespace-nowrap text-fg ${compact ? 'truncate text-xs' : 'text-sm sm:text-base'}`}>
+      <code className={`no-scrollbar min-w-0 flex-1 overflow-x-auto font-mono whitespace-nowrap select-all text-fg ${compact ? 'truncate text-xs' : 'text-sm sm:text-base'}`}>
         <span className="text-accent select-none">$ </span>
         {cmd}
       </code>
