@@ -107,14 +107,20 @@ const OS3 = [
 
 export function Detail({ tool, initialVersion }: { tool: Tool; initialVersion?: string }) {
   const [os, setOs] = useState<Os>(guessOs)
-  const [method, setMethod] = useState<'shell' | 'wget' | 'npm' | 'brew'>('shell')
+  const [method, setMethod] = useState<'shell' | 'bash' | 'zsh' | 'wget' | 'npm' | 'brew'>('shell')
   const [version, setVersion] = useState(initialVersion || 'stable')
 
   const versionOptions = Array.from(new Set(['stable', tool.version, ...(initialVersion && initialVersion !== 'stable' ? [initialVersion] : []), 'beta']))
 
   const methods = [
     { id: 'shell' as const, label: os === 'windows' ? 'PowerShell' : 'curl' },
-    ...(os !== 'windows' ? [{ id: 'wget' as const, label: 'wget' }] : []),
+    ...(os !== 'windows'
+      ? [
+          { id: 'bash' as const, label: 'bash' },
+          { id: 'zsh' as const, label: 'zsh' },
+          { id: 'wget' as const, label: 'wget' },
+        ]
+      : []),
     ...(tool.npm ? [{ id: 'npm' as const, label: 'npm' }] : []),
     ...(tool.brew && os !== 'windows' ? [{ id: 'brew' as const, label: 'brew' }] : []),
   ]
@@ -128,7 +134,11 @@ export function Detail({ tool, initialVersion }: { tool: Tool; initialVersion?: 
         ? `brew install ${tool.brew}`
         : m === 'wget'
           ? `wget -qO- https://opengadget.dev/${spec} | sh`
-          : installCmd(tool.name, os, version)
+          : m === 'bash'
+            ? `curl -sS https://opengadget.dev/${spec} | bash`
+            : m === 'zsh'
+              ? `curl -sS https://opengadget.dev/${spec} | zsh`
+              : installCmd(tool.name, os, version)
   const win = os === 'windows'
   const verSuffix = version === 'stable' || version === 'beta' ? tool.version : version
   const paths = win
@@ -186,7 +196,7 @@ export function Detail({ tool, initialVersion }: { tool: Tool; initialVersion?: 
           <Tabs value={m} onChange={setMethod} options={methods} size="sm" />
         </div>
         <CommandLine cmd={cmd} />
-        {(m === 'shell' || m === 'wget') && (
+        {(m === 'shell' || m === 'bash' || m === 'zsh' || m === 'wget') && (
           <p className="mt-3 px-1 text-xs text-muted">
             Installs {version === 'stable' ? 'the latest stable release' : `@${version}`} to your home folder. Works in sh, bash, and zsh — no sudo prompt.
           </p>
